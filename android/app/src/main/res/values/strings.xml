@@ -1,5 +1,5 @@
 <resources>
-	<string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey"> WUIXUeovFsaxIKc6CvgclqLUhZ1SRIH-N0Kqu</string>
+	<string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">QF1q2O-sAsQtgURhFPavur6p5xOuNCANQfszG</string>
     <string moduleConfig="true" name="reactNativeCodePush_androidServerURL">http://api.code-push.com/</string>
     <string name="app_name">CodePushDemo</string>
 </resources>

@@ -53,7 +53,7 @@ export default class App extends Component {
   render() {
     return (
       <View>
-        <Text>Welcome to CodePush!!....!!Working</Text>
+        <Text>Welcome CodePush</Text>
         <TouchableOpacity onPress={() => this.getAppVersion()}>
           <Text>Press to get getAppVersion from codepush</Text>
         </TouchableOpacity>
