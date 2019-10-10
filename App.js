@@ -1,119 +1,37 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import {
-  AppRegistry,
-  Dimensions,
-  Image,
+  Platform,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
-} from 'react-native';
+  TouchableOpacity
+} from "react-native";
+import codePush from "react-native-code-push";
 
-import CodePush from "react-native-code-push";
+const instructions = Platform.select({
+  ios: "Press Cmd+R to reload,\n" + "Cmd+D or shake for dev menu",
+  android:
+    "Double tap R on your keyboard to reload,\n" +
+    "Shake or press menu button for dev menu"
+});
 
-class App extends Component<{}> {
-  constructor() {
-    super();
-    this.state = { restartAllowed: true };
-  }
-
-  codePushStatusDidChange(syncStatus) {
-    switch(syncStatus) {
-      case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-        this.setState({ syncMessage: "Checking for update." });
-        break;
-      case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-        this.setState({ syncMessage: "Downloading package." });
-        break;
-      case CodePush.SyncStatus.AWAITING_USER_ACTION:
-        this.setState({ syncMessage: "Awaiting user action." });
-        break;
-      case CodePush.SyncStatus.INSTALLING_UPDATE:
-        this.setState({ syncMessage: "Installing update." });
-        break;
-      case CodePush.SyncStatus.UP_TO_DATE:
-        this.setState({ syncMessage: "App up to date.", progress: false });
-        break;
-      case CodePush.SyncStatus.UPDATE_IGNORED:
-        this.setState({ syncMessage: "Update cancelled by user.", progress: false });
-        break;
-      case CodePush.SyncStatus.UPDATE_INSTALLED:
-        this.setState({ syncMessage: "Update installed and will be applied on restart.", progress: false });
-        break;
-      case CodePush.SyncStatus.UNKNOWN_ERROR:
-        this.setState({ syncMessage: "An unknown error occurred.", progress: false });
-        break;
-    }
-  }
-
-  codePushDownloadDidProgress(progress) {
-    this.setState({ progress });
-  }
-
-  toggleAllowRestart() {
-    this.state.restartAllowed
-      ? CodePush.disallowRestart()
-      : CodePush.allowRestart();
-
-    this.setState({ restartAllowed: !this.state.restartAllowed });
-  }
-
-  getUpdateMetadata() {
-    CodePush.getUpdateMetadata(CodePush.UpdateState.RUNNING)
-      .then((metadata: LocalPackage) => {
-        this.setState({ syncMessage: metadata ? JSON.stringify(metadata) : "Running binary version", progress: false });
-      }, (error: any) => {
-        this.setState({ syncMessage: "Error: " + error, progress: false });
-      });
-  }
-
-  /** Update is downloaded silently, and applied on restart (recommended) */
-  sync() {
-    CodePush.sync(
-      {},
-      this.codePushStatusDidChange.bind(this),
-      this.codePushDownloadDidProgress.bind(this)
-    );
-  }
-
-  /** Update pops a confirmation dialog, and then immediately reboots the app */
-  syncImmediate() {
-    CodePush.sync(
-      { installMode: CodePush.InstallMode.IMMEDIATE, updateDialog: true },
-      this.codePushStatusDidChange.bind(this),
-      this.codePushDownloadDidProgress.bind(this)
-    );
+type Props = {};
+export default class App extends Component<Props> {
+  
+  onButtonPress() {
+    codePush.sync({
+      updateDialog: true,
+      installMode: codePush.InstallMode.IMMEDIATE
+    });
   }
 
   render() {
-    let progressView;
-
-    if (this.state.progress) {
-      progressView = (
-        <Text style={styles.messages}>{this.state.progress.receivedBytes} of {this.state.progress.totalBytes} bytes received</Text>
-      );
-    }
-
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to CodePush!!....!!
-        </Text>
-        <TouchableOpacity onPress={this.sync.bind(this)}>
-          <Text style={styles.syncButton}>Press for background sync</Text>
+        <Text style={styles.welcome}> If you could see this text, then Code Push Works for you!!! Enjoy!!!</Text>
+        <TouchableOpacity onPress={this.onButtonPress}>
+          <Text>Check for updates</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={this.syncImmediate.bind(this)}>
-          <Text style={styles.syncButton}>Press for dialog-driven sync</Text>
-        </TouchableOpacity>
-        {progressView}
-        <Image style={styles.image} source={require("./images/laptop_phone_howitworks.png")}/>
-        <TouchableOpacity onPress={this.toggleAllowRestart.bind(this)}>
-          <Text style={styles.restartToggleButton}>Restart { this.state.restartAllowed ? "allowed" : "forbidden"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.getUpdateMetadata.bind(this)}>
-          <Text style={styles.syncButton}>Press for Update Metadata</Text>
-        </TouchableOpacity>
-        <Text style={styles.messages}>{this.state.syncMessage || ""}</Text>
       </View>
     );
   }
@@ -122,41 +40,18 @@ class App extends Component<{}> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F5FCFF",
-    paddingTop: 50
-  },
-  image: {
-    margin: 30,
-    width: Dimensions.get("window").width - 100,
-    height: 365 * (Dimensions.get("window").width - 100) / 651,
-  },
-  messages: {
-    marginTop: 30,
-    textAlign: "center",
-  },
-  restartToggleButton: {
-    color: "blue",
-    fontSize: 17
-  },
-  syncButton: {
-    color: "green",
-    fontSize: 17
+    backgroundColor: "#F5FCFF"
   },
   welcome: {
     fontSize: 20,
     textAlign: "center",
-    margin: 20
+    margin: 10
   },
+  instructions: {
+    textAlign: "center",
+    color: "#333333",
+    marginBottom: 5
+  }
 });
-
-/**
- * Configured with a MANUAL check frequency for easy testing. For production apps, it is recommended to configure a
- * different check frequency, such as ON_APP_START, for a 'hands-off' approach where CodePush.sync() does not
- * need to be explicitly called. All options of CodePush.sync() are also available in this decorator.
- */
-let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
-
-App = CodePush(codePushOptions)(App);
-
-export default App;
