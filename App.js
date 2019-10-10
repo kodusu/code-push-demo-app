@@ -1,57 +1,66 @@
 import React, { Component } from "react";
 import {
-  Platform,
+  AppRegistry,
+  Dimensions,
+  Image,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
-  TouchableOpacity
+  Alert
 } from "react-native";
 import codePush from "react-native-code-push";
 
-const instructions = Platform.select({
-  ios: "Press Cmd+R to reload,\n" + "Cmd+D or shake for dev menu",
-  android:
-    "Double tap R on your keyboard to reload,\n" +
-    "Shake or press menu button for dev menu"
-});
+export default class App extends Component {
+  constructor() {
+    super();
+    this.state = { AppVersion: "no version" };
+  }
 
-type Props = {};
-export default class App extends Component<Props> {
-  
-  onButtonPress() {
-    codePush.sync({
-      updateDialog: true,
-      installMode: codePush.InstallMode.IMMEDIATE
-    });
+  async getAppVersion() {
+    const [{ appVersion }, update] = await Promise.all([
+      codePush.getConfiguration(),
+      codePush.getUpdateMetadata()
+    ]);
+
+    if (!update) {
+      this.setState(
+        {
+          AppVersion: `v${appVersion}`
+        },
+        () => {
+          console.log("No Update Available", this.state.AppVersion);
+          Alert.alert("No Update Available","Current App Version : "+this.state.AppVersion);
+        }
+      );
+      return;
+    }
+
+    const label = update.label.substring(1);
+    this.setState(
+      {
+        AppVersion: `v${appVersion} rev.${label}`
+      },
+      () => {
+        console.log("Update Available", this.state.AppVersion);
+        Alert.alert("Update Available","Updated App Version : "+this.state.AppVersion);
+      }
+    );
+    return;
+    // return `v${appVersion} rev.${label}`;
   }
 
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}> wow If you could see this text, then Code Push Works for you!!! Enjoy!!!</Text>
-        <TouchableOpacity onPress={this.onButtonPress}>
-          <Text>Check for updates</Text>
+      <View>
+        <Text>Welcome to CodePush!!....!!Working</Text>
+        <TouchableOpacity onPress={() => this.getAppVersion()}>
+          <Text>Press to get getAppVersion from codepush</Text>
         </TouchableOpacity>
+        <Text>
+          {this.state.AppVersion || "Default Version"}
+        </Text>
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#F5FCFF"
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: "center",
-    margin: 10
-  },
-  instructions: {
-    textAlign: "center",
-    color: "#333333",
-    marginBottom: 5
-  }
-});
