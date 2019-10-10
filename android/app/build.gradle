@@ -118,11 +118,17 @@ android {
         }
     }
     signingConfigs {
-        release {
+        debug {
             keyAlias "androiddebugkey"
             keyPassword "android"
             storeFile file("../keystores/debug.keystore")
             storePassword "android"
+        }
+        release {
+            keyAlias 'codepushdemo'
+            keyPassword 'codepushdemo'
+            storeFile file('../keystores/codepushdemo.keystore')
+            storePassword 'codepushdemo'
         }
     }
     buildTypes {
